@@ -29,5 +29,5 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_DEPLOY_TO_PROD: true
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          build_directory: client/build # Change to your client build directory
-
+          build_directory: build # Change to your client build directory
+          functions_directory: client
