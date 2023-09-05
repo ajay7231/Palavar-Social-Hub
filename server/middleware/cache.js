@@ -1,11 +1,16 @@
-import Redis from "redis";
-const redisClient = Redis.createClient({
-  password: process.env.REDIS_PASS,
-  socket: {
-    host: "redis-12832.c301.ap-south-1-1.ec2.cloud.redislabs.com",
-    port: 12832,
-  },
+import { createClient } from "redis";
+// const redisClient = Redis.createClient({
+//   password: process.env.REDIS_PASS,
+//   socket: {
+//     host: "redis-12832.c301.ap-south-1-1.ec2.cloud.redislabs.com",
+//     port: 12832,
+//   },
+// });
+
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
 });
+
 await redisClient.connect();
 export default redisClient;
 export const setCache = function (req, res, next) {

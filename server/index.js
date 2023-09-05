@@ -67,7 +67,7 @@ app.use("/users", userRoute);
 app.use("/posts", postRoute);
 app.use("/assets", assetsRoute);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3001;
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
