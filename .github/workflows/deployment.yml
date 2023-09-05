@@ -7,10 +7,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v1
         with:
-          node-version: "18"
-      - run: cd client && npm install
-      - run: cd client && npm run test
-      - run: cd client && npm run build
+          node-version: 18 # Adjust the Node.js version if needed
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: client # Change to your client directory
+
+      - name: Build React app
+        run: npm run build
+        working-directory: client # Change to your client directory
+      - name: Deploy to Netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: npx netlify-cli deploy --prod --dir=client/build
