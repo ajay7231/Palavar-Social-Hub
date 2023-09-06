@@ -9,6 +9,7 @@ import { createTheme } from "@mui/material/styles";
 import { themeSettings } from "./theme";
 import { State } from "./reducers/authReducer";
 import Loader from "./components/Loader";
+import Page from "./components/Page";
 
 const ProfilePage = lazy(() => import("./scenes/profilePage"));
 const HomePage = lazy(() => import("./scenes/homePage"));
@@ -29,7 +30,9 @@ function App() {
               path="/"
               element={
                 <Suspense fallback={<Loader />}>
-                  <LoginPage />
+                  <Page title="Login | Paraval">
+                    <LoginPage />
+                  </Page>
                 </Suspense>
               }
             />
@@ -38,7 +41,9 @@ function App() {
               element={
                 isAuth ? (
                   <Suspense fallback={<Loader />}>
-                    <HomePage />
+                    <Page title="Home | Paraval">
+                      <HomePage />
+                    </Page>
                   </Suspense>
                 ) : (
                   <Navigate to="/" />
@@ -50,7 +55,9 @@ function App() {
               element={
                 isAuth ? (
                   <Suspense fallback={<Loader />}>
-                    <ProfilePage />
+                    <Page title="Profile | Paraval">
+                      <ProfilePage />
+                    </Page>
                   </Suspense>
                 ) : (
                   <Navigate to="/" />

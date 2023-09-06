@@ -29,6 +29,7 @@ const ProfilePage = () => {
     );
     const data = await response.json();
     setUser(data);
+    document.title = `${data.firstName} ${data.lastName} | Paraval`;
   };
 
   useEffect(() => {
