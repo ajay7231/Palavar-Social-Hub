@@ -62,7 +62,15 @@ const initialValuesLogin: LoginValues = {
   password: "",
 };
 
-const Form = () => {
+type MessageType = "success" | "info" | "warning" | "error" | undefined;
+
+type Props = {
+  setError: React.Dispatch<React.SetStateAction<boolean>>;
+  setErrorMessage: React.Dispatch<React.SetStateAction<string>>;
+  setSeverity: React.Dispatch<React.SetStateAction<MessageType>>;
+};
+
+const Form = ({ setError, setErrorMessage, setSeverity }: Props) => {
   const [pageType, setPageType] = useState("login");
   const [loading, setLoading] = useState<boolean>(false);
   const {
@@ -84,7 +92,21 @@ const Form = () => {
     if (isRegister) setInitialValues(initialValuesRegister);
   }, [pageType]);
 
-  const register = async (values: any, onSubmitProps: any) => {
+  const setMessage = (message: string, Type: MessageType) => {
+    setErrorMessage(message);
+    setSeverity(Type);
+    setError(true);
+    setLoading(false);
+  };
+
+  const resetMessage = () => {
+    setError(false);
+    setErrorMessage("");
+    setSeverity("success");
+    setLoading(true);
+  };
+
+  const register = (values: any, onSubmitProps: any) => {
     // this allows us to send form info with image
     const formData = new FormData();
     for (let value in values) {
@@ -92,55 +114,71 @@ const Form = () => {
     }
     formData.append("picturePath", values.picture.name);
 
-    const savedUserResponse = await fetch(
-      `${import.meta.env.VITE_URL}/auth/register`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-    const savedUser = await savedUserResponse.json();
-    onSubmitProps.resetForm();
-
-    if (savedUser) {
-      setPageType("login");
-    }
+    fetch(`${import.meta.env.VITE_URL}/auth/register`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data._id) {
+          setPageType("login");
+          setMessage("Successfully Registered", "success");
+        } else {
+          setMessage(
+            data.error.includes("duplicate key error")
+              ? "Email already exists"
+              : data.error,
+            "error"
+          );
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        onSubmitProps.resetForm();
+      });
   };
 
-  const login = async (values: any, onSubmitProps: any) => {
-    const loggedInResponse = await fetch(
-      `${import.meta.env.VITE_URL}/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      }
-    );
-    const loggedIn = await loggedInResponse.json();
-    // console.log(loggedIn);
-    onSubmitProps.resetForm();
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: { ...loggedIn.user, picture: loggedIn.picture },
-          token: loggedIn.token,
-        })
-      );
-      navigate("/home");
-    }
+  const login = (values: any, onSubmitProps: any) => {
+    fetch(`${import.meta.env.VITE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        if (data && data.token) {
+          dispatch(
+            setLogin({
+              user: { ...data.user, picture: data.picture },
+              token: data.token,
+            })
+          );
+          navigate("/home");
+        } else {
+          setMessage(data.messsage, "error");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        onSubmitProps.resetForm();
+      });
   };
 
   const handleFormSubmit = async (values: any, onSubmitProps: any) => {
-    setLoading(true);
-    if (isLogin) await login(values, onSubmitProps);
-    if (isRegister) await register(values, onSubmitProps);
-    setLoading(false);
+    resetMessage();
+    if (isLogin) login(values, onSubmitProps);
+    if (isRegister) register(values, onSubmitProps);
   };
 
   return (
     <Formik
       onSubmit={handleFormSubmit}
-      // initialValues={isLogin ? initialValuesLogin : initialValuesRegister}
       initialValues={initialValues}
       validationSchema={isLogin ? loginSchema : registerSchema}
     >
@@ -163,7 +201,12 @@ const Form = () => {
         setFieldValue: any;
         resetForm: any;
       }) => (
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
           <Box
             display="grid"
             gap="30px"

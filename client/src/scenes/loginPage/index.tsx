@@ -1,4 +1,4 @@
-import { lazy } from "react";
+import { lazy, useState } from "react";
 import { Box, Typography, useTheme, useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { Suspense, useEffect } from "react";
 import { State } from "../../reducers/authReducer";
 import { CustomPalette } from "../../theme";
 import Loader from "../../components/Loader";
+import Message from "../../components/Message";
 
 const Form = lazy(() => import("./Form"));
 
@@ -18,15 +19,35 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const _id = useSelector((state: State) => state.user?._id);
   const token = useSelector((state: State) => state.token);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [severity, setSeverity] = useState<
+    "success" | "info" | "warning" | "error" | undefined
+  >("success");
+  const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
     // if user is logged in, redirect to home page
     if (_id && token) navigate("/home");
   }, [_id, token]);
 
+  useEffect(() => {
+    if (error) {
+      setIsOpen(true);
+      // setErrorMessage("Something went wrong!");
+      // setSeverity("error");
+    }
+  }, [error]);
+
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
   return (
     <Box>
+      <Message
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        message={errorMessage}
+        severity={severity}
+      />
       <Box
         width="100%"
         sx={{
@@ -62,7 +83,11 @@ const LoginPage = () => {
           Welcome to Paravel, the Social Media for you!
         </Typography>
         <Suspense fallback={<Loader />}>
-          <Form />
+          <Form
+            setError={setError}
+            setErrorMessage={setErrorMessage}
+            setSeverity={setSeverity}
+          />
         </Suspense>
       </Box>
     </Box>
