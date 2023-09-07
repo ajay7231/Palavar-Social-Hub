@@ -92,16 +92,16 @@ const Form = ({ setError, setErrorMessage, setSeverity }: Props) => {
     if (isRegister) setInitialValues(initialValuesRegister);
   }, [pageType]);
 
-  const setMessage = (message: string, Type: MessageType) => {
-    setErrorMessage(message);
-    setSeverity(Type);
+  function setMessage(Type: MessageType): void {
     setError(true);
+    // setErrorMessage(message);
+    setSeverity(Type);
     setLoading(false);
-  };
+  }
 
   const resetMessage = () => {
-    setError(false);
     setErrorMessage("");
+    setError(false);
     setSeverity("success");
     setLoading(true);
   };
@@ -123,14 +123,15 @@ const Form = ({ setError, setErrorMessage, setSeverity }: Props) => {
         console.log(data);
         if (data._id) {
           setPageType("login");
-          setMessage("Successfully Registered", "success");
+          setErrorMessage("Registration successful. Please login.");
+          setMessage("success");
         } else {
-          setMessage(
+          setErrorMessage(
             data.error.includes("duplicate key error")
               ? "Email already exists"
-              : data.error,
-            "error"
+              : data.error
           );
+          setMessage("error");
         }
       })
       .catch((err) => {
@@ -159,11 +160,13 @@ const Form = ({ setError, setErrorMessage, setSeverity }: Props) => {
           );
           navigate("/home");
         } else {
-          setMessage(data.messsage, "error");
+          console.log(typeof data.message, "line 166");
+          setErrorMessage(data.message);
+          setMessage("error");
         }
       })
       .catch((err) => {
-        console.log(err);
+        console.log(JSON.stringify(err), "line 167");
       })
       .finally(() => {
         onSubmitProps.resetForm();

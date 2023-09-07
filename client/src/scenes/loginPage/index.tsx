@@ -33,6 +33,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (error) {
+      // alert(errorMessage);
       setIsOpen(true);
       // setErrorMessage("Something went wrong!");
       // setSeverity("error");
